@@ -6,6 +6,8 @@ from ..routers import reference
 
 
 ALLOWED_TYPE_CODES = {entry["code"] for entry in reference.CODELISTS.get("UNTDID1001", [])}
+ALLOWED_CADRES = set(reference.CODELISTS.get("CADRES", []))
+ALLOWED_DEV_CODES = None
 ID_PATTERN = re.compile(r"^[A-Za-z0-9\s\-+_/]{1,35}$")
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 DATE_COMPACT_PATTERN = re.compile(r"^\d{8}$")
@@ -40,6 +42,11 @@ def check_ubl_f1(root: etree._Element) -> Tuple[List[RuleIssue], List[RuleIssue]
         issues.append(RuleIssue(ruleId="G1.01", severity="error", xpath=".//cbc:InvoiceTypeCode", message="Code type de facture manquant"))
     elif inv_type not in ALLOWED_TYPE_CODES:
         codelist_issues.append(RuleIssue(ruleId="UNTDID1001", severity="error", xpath=".//cbc:InvoiceTypeCode", message=f"Code {inv_type} non autorisé"))
+
+    # Cadre de facturation (G1.02) si présent dans un champ standard (non normatif, mais contrôlable via un attribut)
+    cadre = _text_or_none(root, ".//cbc:BuyerReference", ns)
+    if cadre and ALLOWED_CADRES and cadre not in ALLOWED_CADRES:
+        codelist_issues.append(RuleIssue(ruleId="G1.02", severity="error", xpath=".//cbc:BuyerReference", message=f"Cadre de facturation {cadre} non autorisé"))
 
     return issues, codelist_issues
 
