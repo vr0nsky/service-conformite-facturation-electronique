@@ -16,6 +16,7 @@ Service FastAPI pour auditer la conformité Facturation Electronique (FR) : vali
   - `build_annex_cache.py`: convertit les XLSX en JSON.
   - `run_tests.sh`: lance les tests unittest.
 - `tests/`: tests unitaires (`test_validate.py`).
+- `mcp_server.py`: serveur MCP stdio exposant les outils (validate_invoice, codelists, required_fields, audit, etc.).
 - `requirements.txt`: dépendances Python.
 - `docs/mcp-fe-design.md`: design du service.
 
@@ -40,6 +41,7 @@ Les codelists/motifs/champs obligatoires seront chargés automatiquement depuis 
 ```bash
 source .venv/bin/activate
 uvicorn app.main:app --reload
+# Serveur MCP (stdio) : python mcp_server.py
 ```
 Endpoints disponibles :
 - `POST /validate_message`: `{format: ubl|cii|facturx|cdv|ereporting|annuaire, profile: base|full, flow: f1|f6|f10|f13|f14, payload: xml|base64}` → rapport `{syntax[], rules[], codelists[]}`.
