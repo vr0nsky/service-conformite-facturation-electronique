@@ -36,6 +36,15 @@ class MCPValidateTests(unittest.TestCase):
         self.assertTrue(hasattr(report, "syntax"))
         self.assertTrue(hasattr(report, "rules"))
 
+    def test_validate_ereporting_dates(self):
+        # Minimal synthetic e-reporting payload with a bad date to trigger rule
+        payload = "<Report><ReportingDate>202501-01</ReportingDate></Report>"
+        req = ValidateMessageRequest(format="ereporting", profile=None, flow="f10", payload=payload)
+        report = validate_message(req)
+        self.assertTrue(hasattr(report, "syntax"))
+        # Should raise a G1.09 error for date format
+        self.assertTrue(any(issue.ruleId == "G1.09" for issue in report.rules))
+
     def test_audit_capabilities(self):
         req = AuditCapabilitiesRequest(formats=["ubl"], profiles=["base"], cdv_statuses=["CDV-200"], cadres=["B1"], annuaire=True, facturx=False)
         gaps = audit_capabilities(req)

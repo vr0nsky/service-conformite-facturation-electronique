@@ -7,7 +7,8 @@ from ..routers import reference
 
 ALLOWED_TYPE_CODES = {entry["code"] for entry in reference.CODELISTS.get("UNTDID1001", [])}
 ALLOWED_CADRES = set(reference.CODELISTS.get("CADRES", []))
-ALLOWED_DEV_CODES = None
+ALLOWED_DEV_CODES = {entry["code"] for entry in reference.CODELISTS.get("ISO4217", [])} if reference.CODELISTS.get("ISO4217") else set()
+ALLOWED_COUNTRIES = {entry["code"] for entry in reference.CODELISTS.get("ISO3166", [])} if reference.CODELISTS.get("ISO3166") else set()
 ID_PATTERN = re.compile(r"^[A-Za-z0-9\s\-+_/]{1,35}$")
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 DATE_COMPACT_PATTERN = re.compile(r"^\d{8}$")
@@ -77,6 +78,11 @@ def check_cii_f1(root: etree._Element) -> Tuple[List[RuleIssue], List[RuleIssue]
         issues.append(RuleIssue(ruleId="G1.01", severity="error", xpath=".//rsm:ExchangedDocument/ram:TypeCode", message="Code type de facture manquant"))
     elif inv_type not in ALLOWED_TYPE_CODES:
         codelist_issues.append(RuleIssue(ruleId="UNTDID1001", severity="error", xpath=".//rsm:ExchangedDocument/ram:TypeCode", message=f"Code {inv_type} non autorisé"))
+
+    # Devise BT-5 : monnaie des totaux
+    currency = _text_or_none(root, ".//ram:ApplicableHeaderTradeSettlement/ram:InvoiceCurrencyCode", ns)
+    if currency and ALLOWED_DEV_CODES and currency not in ALLOWED_DEV_CODES:
+        codelist_issues.append(RuleIssue(ruleId="G1.10", severity="error", xpath=".//ram:ApplicableHeaderTradeSettlement/ram:InvoiceCurrencyCode", message=f"Devise {currency} non autorisée (ISO 4217)"))
 
     return issues, codelist_issues
 

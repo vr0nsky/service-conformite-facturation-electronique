@@ -52,6 +52,7 @@ def _load_caches():
             {"code": "ERR_VALIDEUR", "label": "Mauvais valideur"},
             {"code": "CMD_EJ_ERR", "label": "Commande/Engagement incorrect ou manquant"},
         ],
+        "CADRES": ["B1", "S1", "M1", "B2", "S2", "M2", "B4", "S4", "M4", "S5", "S6", "B7", "S7"],
     }
     if not base.exists():
         CODELISTS.update(defaults)
@@ -168,6 +169,31 @@ def _load_caches():
                 REQUIRED_FIELDS[("base", "f1")] = req_base
             if req_full:
                 REQUIRED_FIELDS[("full", "f1")] = req_full
+        except Exception:
+            pass
+
+    # Extract ISO codes from EN16931 Codelists (best-effort)
+    codelists_sheet = base / "20251031_Annexe 7 - Règles de gestion - V1.8.json"
+    if codelists_sheet.exists():
+        try:
+            data = json.loads(codelists_sheet.read_text(encoding="utf-8"))
+            rows = data.get("EN16931 Codelists", [])
+            iso4217 = []
+            iso3166 = []
+            for row in rows:
+                if not row or len(row) < 24:
+                    continue
+                # Currency code sometimes in col 23, country alpha2 in col 16/17, country name in 19/20.
+                currency_code = row[23]
+                if currency_code and isinstance(currency_code, str) and len(currency_code.strip()) == 3:
+                    iso4217.append({"code": currency_code.strip(), "label": str(row[20] if len(row) > 20 else "")})
+                country_alpha2 = row[16] if len(row) > 16 else None
+                if country_alpha2 and isinstance(country_alpha2, str) and len(country_alpha2.strip()) == 2:
+                    iso3166.append({"code": country_alpha2.strip(), "label": str(row[19] if len(row) > 19 else "")})
+            if iso4217:
+                CODELISTS["ISO4217"] = iso4217
+            if iso3166:
+                CODELISTS["ISO3166"] = iso3166
         except Exception:
             pass
 
