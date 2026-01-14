@@ -5,12 +5,7 @@ import json
 
 router = APIRouter()
 
-# Minimal embedded references; can be replaced by cache from annexes.
-RULES: Dict[str, Dict] = {
-    "G1.01": {"title": "Types de facture autorisés", "flows": ["f1"], "severity": "error"},
-    "G1.02": {"title": "Cadre de Facturation", "flows": ["f1"], "severity": "error"},
-    "G1.05": {"title": "Identifiant de facture", "flows": ["f1"], "severity": "error"},
-}
+RULES: Dict[str, Dict] = {}
 
 CODELISTS: Dict[str, List[Dict]] = {}
 
@@ -82,6 +77,70 @@ def _load_caches():
         except Exception:
             pass
     CODELISTS.update(defaults)
+
+    # Rules from Annexe 7 - Règles de gestion
+    rules_path = base / "20251031_Annexe 7 - Règles de gestion - V1.8.json"
+    flows_map = {3: "f1", 4: "f6", 5: "f10", 6: "f13", 7: "f14"}
+    if rules_path.exists():
+        try:
+            data = json.loads(rules_path.read_text(encoding="utf-8"))
+            sheet = data.get("Règles de gestion", [])
+            for row in sheet[2:]:
+                if not row or len(row) < 2:
+                    continue
+                rid = row[1]
+                title = row[0]
+                label = row[2] if len(row) > 2 else ""
+                if not rid or not isinstance(rid, str):
+                    continue
+                flows = []
+                for idx, f in flows_map.items():
+                    if len(row) > idx and row[idx] == "X":
+                        flows.append(f)
+                RULES[rid] = {"title": title or "", "description": label or "", "flows": flows, "severity": "error"}
+        except Exception:
+            pass
+
+    # Required fields from Annexe 6 (e-reporting)
+    annex6 = base / "20251031_Annexe 6 - Format sémantique FE e-reporting - V1.9.json"
+    if annex6.exists():
+        try:
+            data = json.loads(annex6.read_text(encoding="utf-8"))
+            sheet = data.get("E-REPORTING - Flux 10", [])
+            req = []
+            for row in sheet:
+                if not row or len(row) < 2:
+                    continue
+                bt = row[0]
+                card = str(row[1]).strip() if row[1] is not None else ""
+                if bt and isinstance(bt, str) and card.startswith("1.."):
+                    req.append(bt)
+            if req:
+                REQUIRED_FIELDS[("base", "f10")] = req
+                REQUIRED_FIELDS[("full", "f10")] = req
+        except Exception:
+            pass
+
+    # Required fields from Annexe 3 (annuaire)
+    annex3 = base / "20251031_Annexe 3 - Format sémantique FE annuaire - V1.7.json"
+    if annex3.exists():
+        try:
+            data = json.loads(annex3.read_text(encoding="utf-8"))
+            for sheet_name, flow in [("FE - F13 (Actualisation)", "f13"), ("FE - F14 (Consultation)", "f14")]:
+                sheet = data.get(sheet_name, [])
+                req = []
+                for row in sheet:
+                    if not row or len(row) < 2:
+                        continue
+                    bt = row[0]
+                    card = str(row[1]).strip() if row[1] is not None else ""
+                    if bt and isinstance(bt, str) and card.startswith("1.."):
+                        req.append(bt)
+                if req:
+                    REQUIRED_FIELDS[("base", flow)] = req
+                    REQUIRED_FIELDS[("full", flow)] = req
+        except Exception:
+            pass
 
     # Required fields from Annexe 1 (FE - Flux 1 - UBL)
     annex1 = base / "20251031_Annexe 1 - Format sémantique FE e-invoicing - Flux 1 v1.1.json"

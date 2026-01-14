@@ -49,7 +49,27 @@ Endpoints disponibles :
 - XSD mappés : UBL e-invoicing facture/avoir Base/Full, CII e-invoicing (CrossIndustryInvoice Base/Full), e-reporting, annuaire. CDV : non mappé (XSD absent dans le bundle).
 - Règles métier implémentées (UBL F1) :
   - G1.05 (ID facture : longueur/caractères), G1.09 (date AAAA-MM-JJ), G1.01 (code type UNTDID1001 autorisé).
-- Codelists/motifs : chargés depuis Annexe 7 (15 codes UNTDID1001, ~40 motifs de refus). Champs obligatoires F1 Base/Full issus de l’Annexe 1.
+- Codelists/motifs : chargés depuis Annexe 7 (15 codes UNTDID1001, ~40 motifs de refus). Champs obligatoires extraits : F1 Base/Full (Annexe 1), e-reporting F10 (Annexe 6), annuaire F13/F14 (Annexe 3).
+
+## Détail des endpoints
+- `POST /validate_message`
+  - Entrée : `format` (ubl|cii|facturx|cdv|ereporting|annuaire), `profile` (base|full si pertinent), `flow` (f1|f6|f10|f13|f14 si pertinent), `payload` XML (string) ou base64 (si ça ne commence pas par `<`, tentative de base64.b64decode).
+  - Traitement : décodage, validation XSD (UBL/CII F1, e-reporting, annuaire ; CDV non mappé → “No schema found…”), règles UBL/F1 (ID G1.05, date G1.09, type G1.01 via UNTDID1001), issues de codelist séparées.
+  - Réponse : `{ "syntax": [...], "rules": [ {ruleId, severity, xpath, message} ], "codelists": [...] }`.
+- `POST /audit_capabilities`
+  - Entrée : `{formats, profiles, cdv_statuses, cadres, annuaire, facturx}`.
+  - Exigences internes : formats `ubl, cii`; profils `base, full`; statuts CDV `CDV-200,202,203,205,207,211,212,213,220`; cadres `B1,S1,M1,B2,S2,M2,B4,S4,M4,S5,S6,B7,S7`.
+  - Retour : `{missingFormats, missingProfiles, missingCDV, missingCadres, notes}`.
+- `GET /rules/{id}` : stub de règles (G1.01, G1.02, G1.05) → 404 sinon.
+- `GET /codelists/{name}` : codelists depuis caches (ex. UNTDID1001, CDV_REFUS) ou 404 si inconnu.
+- `GET /required_fields?profile=base|full&flow=f1` : BT obligatoires (Annexe 1).
+- `POST /next_status` : `{current, scenario?}` → statuts CDV autorisés (stub transitions : None→200→202→203/213→205/207→211→212).
+- `GET /refusal_codes` : motifs de refus (env. 40 codes depuis Annexe 7).
+
+## Utilisation par un AI
+- Validation : `/validate_message` sur les XML ERP → corriger les erreurs XSD/règles/codelists, revalider.
+- Audit : `/audit_capabilities` → lire les gaps (formats/profils/statuts/cadres) et générer la todo.
+- Référentiels : `/codelists/{name}` et `/required_fields` pour alimenter DTO/contrôles ; `/next_status` pour guider les enchaînements CDV.
 
 ## Tests
 Tests unitaires (sans dépendance httpx) :
