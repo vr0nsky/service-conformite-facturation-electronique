@@ -9,7 +9,7 @@ Service FastAPI pour auditer la conformité Facturation Electronique (FR) : vali
   - `services/`: `xsd_validator.py` (validation XSD), `rules_engine.py` (règles métier/codelists UBL F1).
   - `models/`: modèles Pydantic.
 - `data/`: ressources.
-  - `xsd/3- XSD_v3.1`: schémas UBL e-invoicing (facture/avoir Base/Full), CII e-invoicing (Base/Full), e-reporting, annuaire. Pas de CDV dans le bundle actuel.
+  - `xsd/3- XSD_v3.1`: schémas UBL e-invoicing (facture/avoir Base/Full), CII e-invoicing (Base/Full), e-reporting, annuaire. CDV : schéma pivot Chorus Pro `CPPStatutPivot_V1_19.xsd` ajouté sous `data/xsd/cpp/`.
   - `annexes_cache/`: JSON générés depuis les annexes XLSX (formats sémantiques, règles, codelists, motifs de refus).
   - `examples/`: vide (à remplir si besoin).
 - `scripts/`: utilitaires.
@@ -54,7 +54,7 @@ Endpoints disponibles :
 ## Détail des endpoints
 - `POST /validate_message`
   - Entrée : `format` (ubl|cii|facturx|cdv|ereporting|annuaire), `profile` (base|full si pertinent), `flow` (f1|f6|f10|f13|f14 si pertinent), `payload` XML (string) ou base64 (si ça ne commence pas par `<`, tentative de base64.b64decode).
-  - Traitement : décodage, validation XSD (UBL/CII F1, e-reporting, annuaire ; CDV non mappé → “No schema found…”), règles UBL/F1 (ID G1.05, date G1.09, type G1.01 via UNTDID1001), issues de codelist séparées.
+  - Traitement : décodage, validation XSD (UBL/CII F1, e-reporting, annuaire, CDV avec schéma pivot Chorus Pro), règles UBL/F1 (ID G1.05, date G1.09, type G1.01 via UNTDID1001), issues de codelist séparées.
   - Réponse : `{ "syntax": [...], "rules": [ {ruleId, severity, xpath, message} ], "codelists": [...] }`.
 - `POST /audit_capabilities`
   - Entrée : `{formats, profiles, cdv_statuses, cadres, annuaire, facturx}`.
@@ -81,7 +81,7 @@ python -m unittest MCP.tests.test_validate_ubl
 ```
 
 ## TODO / Améliorations
-- Ajouter les XSD CII et CDV si disponibles, étendre `_SCHEMA_MAP`.
+- Remplacer le schéma CDV pivot par le flux 6 officiel (si disponible) et affiner `_SCHEMA_MAP`.
 - Enrichir `rules_engine` avec plus de règles Gx/BR (lectures des caches annexes) et codelists supplémentaires.
 - Exposer d’autres endpoints (génération d’exemples UBL/CII, séquences CDV, annuaire simulé).
 - Ajouter des jeux d’exemples dans `data/examples/` et des tests E2E couvrant plus de flux (F6, F10).
