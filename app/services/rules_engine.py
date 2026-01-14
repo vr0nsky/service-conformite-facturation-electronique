@@ -93,4 +93,29 @@ def evaluate(xml_content: bytes, fmt: str, flow: str | None = None) -> Tuple[Lis
     if fmt == "cii" and flow == "f1":
         return check_cii_f1(root)
 
+    # Minimal generic checks for e-reporting: dates AAAAMMJJ
+    if fmt == "ereporting":
+        issues = []
+        for elem in root.iter():
+            lname = etree.QName(elem.tag).localname if isinstance(elem.tag, str) else ""
+            if "Date" in lname or "date" in lname:
+                txt = (elem.text or "").strip()
+                if txt and not DATE_COMPACT_PATTERN.match(txt):
+                    issues.append(RuleIssue(ruleId="G1.09", severity="error", xpath=f".//{elem.tag}", message="Date non au format AAAAMMJJ"))
+        return issues, codelist_issues
+
+    # Minimal generic checks pour l'annuaire : SIREN/SIRET longueurs
+    if fmt == "annuaire":
+        issues = []
+        for elem in root.iter():
+            lname = etree.QName(elem.tag).localname if isinstance(elem.tag, str) else ""
+            txt = (elem.text or "").strip()
+            if not txt:
+                continue
+            if lname.upper() == "SIREN" and len(txt) != 9:
+                issues.append(RuleIssue(ruleId="ANN-SIREN", severity="error", xpath=f".//{elem.tag}", message="SIREN doit contenir 9 chiffres"))
+            if lname.upper() == "SIRET" and len(txt) != 14:
+                issues.append(RuleIssue(ruleId="ANN-SIRET", severity="error", xpath=f".//{elem.tag}", message="SIRET doit contenir 14 chiffres"))
+        return issues, codelist_issues
+
     return issues, codelist_issues

@@ -47,9 +47,11 @@ Endpoints disponibles :
 
 ## Règles et validations
 - XSD mappés : UBL e-invoicing facture/avoir Base/Full, CII e-invoicing (CrossIndustryInvoice Base/Full), e-reporting, annuaire. CDV : mappé sur le schéma pivot Chorus Pro `CPPStatutPivot_V1_19.xsd` (à remplacer par le flux 6 officiel si disponible).
-- Règles métier implémentées :
+- Règles métier implémentées (partielles) :
   - UBL F1 : G1.05 (ID facture : longueur/caractères), G1.09 (date AAAA-MM-JJ), G1.01 (code type UNTDID1001 autorisé).
   - CII F1 : ID (G1.05, format/longueur), date AAAAMMJJ (G1.09), type facture (G1.01).
+  - E-reporting (minimal) : dates au format AAAAMMJJ pour les éléments *Date*.
+  - Annuaire (minimal) : longueurs SIREN/SIRET (9 / 14).
 - Codelists/motifs : chargés depuis Annexe 7 (15 codes UNTDID1001, ~40 motifs de refus). Champs obligatoires extraits : F1 Base/Full (Annexe 1), e-reporting F10 (Annexe 6), annuaire F13/F14 (Annexe 3).
 
 ## Détail des endpoints
