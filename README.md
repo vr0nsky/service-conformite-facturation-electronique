@@ -6,10 +6,17 @@ Service FastAPI pour auditer la conformité Facturation Electronique (FR) : vali
 
 ## Service en ligne
 
-Le service REST est disponible en ligne à l'adresse : **https://femcp.com2nice.fr/**
+Le service est disponible en ligne à l'adresse : **https://femcp.com2nice.fr/**
 
+### API REST
 - Documentation Swagger : https://femcp.com2nice.fr/docs
 - Endpoints REST disponibles immédiatement (voir section "Détail des endpoints")
+
+### Serveur MCP distant (SSE)
+- Endpoint SSE : `https://femcp.com2nice.fr/sse`
+- Endpoint messages : `https://femcp.com2nice.fr/messages/`
+
+**Aucune installation requise !** Configurez simplement votre client MCP (Claude Desktop, Cursor, etc.) :
 
 ---
 
@@ -17,9 +24,27 @@ Le service REST est disponible en ligne à l'adresse : **https://femcp.com2nice.
 
 Ce projet expose également un **serveur MCP** permettant aux assistants IA (Claude Desktop, Claude Code, Cursor, etc.) d'utiliser directement les outils de validation et référentiels.
 
-### Mode local (stdio)
+### Utilisation du serveur MCP public (recommandé)
 
-Pour une utilisation locale, ajouter dans `~/.claude/claude_desktop_config.json` (macOS/Linux) ou `%APPDATA%\Claude\claude_desktop_config.json` (Windows) :
+Ajouter dans votre fichier de configuration MCP :
+- Claude Desktop : `~/.claude/claude_desktop_config.json` (macOS/Linux) ou `%APPDATA%\Claude\claude_desktop_config.json` (Windows)
+- Cursor : `.cursor/mcp.json`
+
+```json
+{
+  "mcpServers": {
+    "fe-compliance": {
+      "url": "https://femcp.com2nice.fr/sse"
+    }
+  }
+}
+```
+
+C'est tout ! Les outils de validation FE sont immédiatement disponibles.
+
+### Mode local (stdio) - optionnel
+
+Si vous préférez héberger le serveur localement :
 
 ```json
 {
@@ -32,33 +57,17 @@ Pour une utilisation locale, ajouter dans `~/.claude/claude_desktop_config.json`
 }
 ```
 
-### Mode distant (SSE)
-
-Le serveur MCP peut être lancé en mode SSE pour un accès distant :
+### Héberger votre propre serveur SSE
 
 ```bash
-# Lancer le serveur SSE sur le port 8001
+# Cloner le projet
+git clone https://github.com/vr0nsky/service-conformite-facturation-electronique.git
+cd service-conformite-facturation-electronique
+
+# Installer et lancer
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
 python mcp_server.py --sse --port 8001
-
-# Ou avec uvicorn directement
-uvicorn mcp_server:app --host 0.0.0.0 --port 8001
-```
-
-**Endpoints SSE :**
-- Health check : `http://votre-serveur:8001/`
-- SSE : `http://votre-serveur:8001/sse`
-- Messages : `http://votre-serveur:8001/messages/`
-
-**Configuration client pour accès distant :**
-
-```json
-{
-  "mcpServers": {
-    "fe-compliance": {
-      "url": "http://votre-serveur:8001/sse"
-    }
-  }
-}
 ```
 
 ### Outils MCP disponibles
