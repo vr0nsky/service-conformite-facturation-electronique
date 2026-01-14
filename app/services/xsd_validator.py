@@ -10,7 +10,8 @@ _SCHEMA_MAP = {
     ("creditnote-ubl", "f1", "full"): "3- XSD_v3.1/2 - E-invoicing/F1_FULL_UBL_2.1/F1FULL_UBL_CreditNote-2.1.xsd",
     ("cii", "f1", "base"): "3- XSD_v3.1/2 - E-invoicing/F1_BASE_CII_D22B/uncefact/data/standard/F1BASE_CrossIndustryInvoice_100pD22B.xsd",
     ("cii", "f1", "full"): "3- XSD_v3.1/2 - E-invoicing/F1_FULL_CII_D22B/uncefact/data/standard/F1FULL_CrossIndustryInvoice_100pD22B.xsd",
-    ("cdv", "f6", None): None,
+    # Flux 6 (CDV) approximated with Chorus Pro Statut Pivot schema
+    ("cdv", "f6", None): "cpp/CPPStatutPivot_V1_19.xsd",
     ("ereporting", None, None): "3- XSD_v3.1/1 - E-reporting/ereporting.xsd",
     ("annuaire", None, None): "3- XSD_v3.1/0 - Annuaire/common/Annuaire_Commun.xsd",
 }
