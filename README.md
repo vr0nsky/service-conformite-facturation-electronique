@@ -2,6 +2,59 @@
 
 Service FastAPI pour auditer la conformité Facturation Electronique (FR) : validation syntaxique/métier, référentiels (règles/codelists), audit de capacités, et chargement des annexes v3.1.
 
+---
+
+## Service en ligne
+
+Le service REST est disponible en ligne à l'adresse : **https://femcp.com2nice.fr/**
+
+- Documentation Swagger : https://femcp.com2nice.fr/docs
+- Endpoints REST disponibles immédiatement (voir section "Détail des endpoints")
+
+---
+
+## Utilisation comme serveur MCP (Model Context Protocol)
+
+Ce projet expose également un **serveur MCP** permettant aux assistants IA (Claude Desktop, Claude Code, Cursor, etc.) d'utiliser directement les outils de validation et référentiels.
+
+### Configuration pour Claude Desktop
+
+Ajouter dans `~/.claude/claude_desktop_config.json` (macOS/Linux) ou `%APPDATA%\Claude\claude_desktop_config.json` (Windows) :
+
+```json
+{
+  "mcpServers": {
+    "fe-compliance": {
+      "command": "python",
+      "args": ["/chemin/vers/MCP/mcp_server.py"]
+    }
+  }
+}
+```
+
+### Outils MCP disponibles
+
+| Outil | Description |
+|-------|-------------|
+| `validate_invoice` | Valide une facture électronique (UBL, CII, Factur-X, CDV, e-reporting, annuaire) |
+| `get_codelist` | Récupère une codelist (UNTDID1001, CDV_REFUS, ISO4217, ISO3166, CADRES) |
+| `get_required_fields` | Retourne les champs obligatoires (codes BT) pour un profil/flux donné |
+| `get_rule` | Détails d'une règle métier (G1.01, G1.05, etc.) |
+| `get_refusal_codes` | Liste des codes de refus CDV |
+| `get_next_status` | Statuts CDV suivants autorisés depuis un statut donné |
+| `audit_capabilities` | Audit des capacités d'une plateforme vs exigences FE |
+| `list_available_codelists` | Liste les codelists disponibles |
+
+### Exemple d'utilisation avec un assistant IA
+
+Une fois configuré, vous pouvez demander à l'assistant :
+
+> « Valide cette facture UBL : `<Invoice>...</Invoice>` »
+
+L'assistant appellera automatiquement l'outil `validate_invoice` et vous retournera le rapport de validation (erreurs XSD, violations de règles métier, problèmes de codelists).
+
+---
+
 ## Contenu du dépôt MCP
 - `app/`: code FastAPI.
   - `main.py`: bootstrap FastAPI, routes.
