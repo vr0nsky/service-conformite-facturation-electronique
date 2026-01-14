@@ -46,7 +46,7 @@ Endpoints disponibles :
 - `GET /rules/{id}`, `GET /codelists/{name}`, `GET /required_fields`, `POST /next_status`, `GET /refusal_codes`.
 
 ## Règles et validations
-- XSD mappés : UBL e-invoicing facture/avoir Base/Full, CII e-invoicing (CrossIndustryInvoice Base/Full), e-reporting, annuaire. CDV : non mappé (XSD absent dans le bundle).
+- XSD mappés : UBL e-invoicing facture/avoir Base/Full, CII e-invoicing (CrossIndustryInvoice Base/Full), e-reporting, annuaire. CDV : mappé sur le schéma pivot Chorus Pro `CPPStatutPivot_V1_19.xsd` (à remplacer par le flux 6 officiel si disponible).
 - Règles métier implémentées (UBL F1) :
   - G1.05 (ID facture : longueur/caractères), G1.09 (date AAAA-MM-JJ), G1.01 (code type UNTDID1001 autorisé).
 - Codelists/motifs : chargés depuis Annexe 7 (15 codes UNTDID1001, ~40 motifs de refus). Champs obligatoires extraits : F1 Base/Full (Annexe 1), e-reporting F10 (Annexe 6), annuaire F13/F14 (Annexe 3).
