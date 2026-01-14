@@ -2,10 +2,16 @@
 """
 MCP Server for FE Compliance Service.
 Exposes invoice validation and reference data tools via Model Context Protocol.
+
+Modes:
+  - stdio (default): python mcp_server.py
+  - SSE (remote):    python mcp_server.py --sse --port 8001
+                     or: uvicorn mcp_server:app --host 0.0.0.0 --port 8001
 """
 import sys
 import json
 import base64
+import argparse
 from pathlib import Path
 from typing import Optional
 
@@ -304,12 +310,78 @@ async def call_tool(name: str, arguments: dict):
     return [TextContent(type="text", text=json.dumps({"error": f"Unknown tool: {name}"}))]
 
 
-async def main():
-    """Run the MCP server."""
+# =============================================================================
+# SSE Transport (for remote access)
+# =============================================================================
+
+def create_sse_app():
+    """Create Starlette app with SSE transport for remote MCP access."""
+    from mcp.server.sse import SseServerTransport
+    from starlette.applications import Starlette
+    from starlette.routing import Route, Mount
+    from starlette.responses import JSONResponse
+
+    sse = SseServerTransport("/messages/")
+
+    async def handle_sse(request):
+        async with sse.connect_sse(request.scope, request.receive, request._send) as streams:
+            await server.run(streams[0], streams[1], server.create_initialization_options())
+
+    async def handle_messages(request):
+        return await sse.handle_post_message(request.scope, request.receive, request._send)
+
+    async def health(request):
+        return JSONResponse({"status": "ok", "server": "fe-compliance", "mode": "sse"})
+
+    return Starlette(
+        debug=True,
+        routes=[
+            Route("/", endpoint=health),
+            Route("/sse", endpoint=handle_sse),
+            Route("/messages/", endpoint=handle_messages, methods=["POST"]),
+        ]
+    )
+
+
+# ASGI app for uvicorn
+app = create_sse_app()
+
+
+# =============================================================================
+# CLI Entry Point
+# =============================================================================
+
+async def run_stdio():
+    """Run MCP server in stdio mode (local)."""
     async with stdio_server() as (read_stream, write_stream):
         await server.run(read_stream, write_stream, server.create_initialization_options())
 
 
-if __name__ == "__main__":
+async def run_sse(host: str, port: int):
+    """Run MCP server in SSE mode (remote)."""
+    import uvicorn
+    config = uvicorn.Config(app, host=host, port=port, log_level="info")
+    srv = uvicorn.Server(config)
+    await srv.serve()
+
+
+def main():
+    parser = argparse.ArgumentParser(description="MCP FE Compliance Server")
+    parser.add_argument("--sse", action="store_true", help="Run in SSE mode (remote access)")
+    parser.add_argument("--host", default="0.0.0.0", help="Host for SSE mode (default: 0.0.0.0)")
+    parser.add_argument("--port", type=int, default=8001, help="Port for SSE mode (default: 8001)")
+    args = parser.parse_args()
+
     import asyncio
-    asyncio.run(main())
+
+    if args.sse:
+        print(f"Starting MCP server in SSE mode on {args.host}:{args.port}")
+        print(f"  - Health check: http://{args.host}:{args.port}/")
+        print(f"  - SSE endpoint: http://{args.host}:{args.port}/sse")
+        asyncio.run(run_sse(args.host, args.port))
+    else:
+        asyncio.run(run_stdio())
+
+
+if __name__ == "__main__":
+    main()

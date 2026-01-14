@@ -17,9 +17,9 @@ Le service REST est disponible en ligne à l'adresse : **https://femcp.com2nice.
 
 Ce projet expose également un **serveur MCP** permettant aux assistants IA (Claude Desktop, Claude Code, Cursor, etc.) d'utiliser directement les outils de validation et référentiels.
 
-### Configuration pour Claude Desktop
+### Mode local (stdio)
 
-Ajouter dans `~/.claude/claude_desktop_config.json` (macOS/Linux) ou `%APPDATA%\Claude\claude_desktop_config.json` (Windows) :
+Pour une utilisation locale, ajouter dans `~/.claude/claude_desktop_config.json` (macOS/Linux) ou `%APPDATA%\Claude\claude_desktop_config.json` (Windows) :
 
 ```json
 {
@@ -27,6 +27,35 @@ Ajouter dans `~/.claude/claude_desktop_config.json` (macOS/Linux) ou `%APPDATA%\
     "fe-compliance": {
       "command": "python",
       "args": ["/chemin/vers/MCP/mcp_server.py"]
+    }
+  }
+}
+```
+
+### Mode distant (SSE)
+
+Le serveur MCP peut être lancé en mode SSE pour un accès distant :
+
+```bash
+# Lancer le serveur SSE sur le port 8001
+python mcp_server.py --sse --port 8001
+
+# Ou avec uvicorn directement
+uvicorn mcp_server:app --host 0.0.0.0 --port 8001
+```
+
+**Endpoints SSE :**
+- Health check : `http://votre-serveur:8001/`
+- SSE : `http://votre-serveur:8001/sse`
+- Messages : `http://votre-serveur:8001/messages/`
+
+**Configuration client pour accès distant :**
+
+```json
+{
+  "mcpServers": {
+    "fe-compliance": {
+      "url": "http://votre-serveur:8001/sse"
     }
   }
 }
