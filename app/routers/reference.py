@@ -27,6 +27,7 @@ NEXT_STATUS_MAP = {
 def _load_caches():
     """Load codelists from annex cache if available; fall back to embedded defaults."""
     base = Path(__file__).resolve().parents[2] / "data/annexes_cache"
+    embedded = Path(__file__).resolve().parents[2] / "data/annexes_cache_embedded"
     defaults = {
         "UNTDID1001": [
             {"code": "380", "label": "Facture"},
@@ -54,11 +55,15 @@ def _load_caches():
         ],
         "CADRES": ["B1", "S1", "M1", "B2", "S2", "M2", "B4", "S4", "M4", "S5", "S6", "B7", "S7"],
     }
-    if not base.exists():
+    if base.exists():
+        cache_base = base
+    elif embedded.exists():
+        cache_base = embedded
+    else:
         CODELISTS.update(defaults)
         return
     # Motifs de refus depuis l'annexe 7 si présent
-    motifs_path = base / "20251031_Annexe 7 - Règles de gestion - V1.8.json"
+    motifs_path = cache_base / "20251031_Annexe 7 - Règles de gestion - V1.8.json"
     if motifs_path.exists():
         try:
             data = json.loads(motifs_path.read_text(encoding="utf-8"))
@@ -103,7 +108,7 @@ def _load_caches():
             pass
 
     # Required fields from Annexe 6 (e-reporting)
-    annex6 = base / "20251031_Annexe 6 - Format sémantique FE e-reporting - V1.9.json"
+    annex6 = cache_base / "20251031_Annexe 6 - Format sémantique FE e-reporting - V1.9.json"
     if annex6.exists():
         try:
             data = json.loads(annex6.read_text(encoding="utf-8"))
@@ -123,7 +128,7 @@ def _load_caches():
             pass
 
     # Required fields from Annexe 3 (annuaire)
-    annex3 = base / "20251031_Annexe 3 - Format sémantique FE annuaire - V1.7.json"
+    annex3 = cache_base / "20251031_Annexe 3 - Format sémantique FE annuaire - V1.7.json"
     if annex3.exists():
         try:
             data = json.loads(annex3.read_text(encoding="utf-8"))
@@ -144,7 +149,7 @@ def _load_caches():
             pass
 
     # Required fields from Annexe 1 (FE - Flux 1 - UBL)
-    annex1 = base / "20251031_Annexe 1 - Format sémantique FE e-invoicing - Flux 1 v1.1.json"
+    annex1 = cache_base / "20251031_Annexe 1 - Format sémantique FE e-invoicing - Flux 1 v1.1.json"
     if annex1.exists():
         try:
             data = json.loads(annex1.read_text(encoding="utf-8"))
@@ -173,7 +178,7 @@ def _load_caches():
             pass
 
     # Extract ISO codes from EN16931 Codelists (best-effort)
-    codelists_sheet = base / "20251031_Annexe 7 - Règles de gestion - V1.8.json"
+    codelists_sheet = cache_base / "20251031_Annexe 7 - Règles de gestion - V1.8.json"
     if codelists_sheet.exists():
         try:
             data = json.loads(codelists_sheet.read_text(encoding="utf-8"))

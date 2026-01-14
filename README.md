@@ -28,13 +28,13 @@ pip install -r requirements.txt
 ```
 
 ## Génération des caches annexes
-Nécessite les annexes XLSX (fournies séparément, ex. dossier `specifications-externes-v3.1/2- Annexes_v3.1` placé à côté du projet).
+Des caches JSON sont fournis dans `data/annexes_cache_embedded/`. Si vous voulez régénérer depuis les annexes XLSX (fournies séparément, ex. dossier `specifications-externes-v3.1/2- Annexes_v3.1` placé à côté du projet) :
 ```bash
 source .venv/bin/activate
 python scripts/build_annex_cache.py --src "../specifications-externes-v3.1/2- Annexes_v3.1" --out data/annexes_cache
 # ajuster --src selon l’emplacement réel des annexes
 ```
-Les codelists/motifs/champs obligatoires seront chargés automatiquement depuis ces JSON.
+Les codelists/motifs/champs obligatoires seront chargés automatiquement depuis `data/annexes_cache` si présent, sinon depuis `data/annexes_cache_embedded`.
 
 ## Lancement du service
 ```bash
