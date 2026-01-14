@@ -21,6 +21,16 @@ class MCPValidateTests(unittest.TestCase):
         gaps = audit_capabilities(req)
         self.assertTrue(hasattr(gaps, "missingFormats"))
 
+    def test_validate_cii_invoice_example(self):
+        sample = Path(__file__).resolve().parents[2] / "xp_z12-012_annexes_a_v1.2_et_b_exemples_v1.2/XP_Z12-012_Annexes_A_V1.2_et_B_EXEMPLES_V1.2/XP_Z12-012_Annexe_B_EXEMPLES_V1.2/Factures/F202500003/UC1_F202500003_00-INV_20250701_CII.xml"
+        if not sample.exists():
+            self.skipTest("Sample CII file not present")
+        payload = sample.read_text(encoding="utf-8")
+        req = ValidateMessageRequest(format="cii", profile="base", flow="f1", payload=payload)
+        report = validate_message(req)
+        self.assertTrue(hasattr(report, "syntax"))
+        self.assertTrue(hasattr(report, "rules"))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -47,14 +47,15 @@ Endpoints disponibles :
 
 ## Règles et validations
 - XSD mappés : UBL e-invoicing facture/avoir Base/Full, CII e-invoicing (CrossIndustryInvoice Base/Full), e-reporting, annuaire. CDV : mappé sur le schéma pivot Chorus Pro `CPPStatutPivot_V1_19.xsd` (à remplacer par le flux 6 officiel si disponible).
-- Règles métier implémentées (UBL F1) :
-  - G1.05 (ID facture : longueur/caractères), G1.09 (date AAAA-MM-JJ), G1.01 (code type UNTDID1001 autorisé).
+- Règles métier implémentées :
+  - UBL F1 : G1.05 (ID facture : longueur/caractères), G1.09 (date AAAA-MM-JJ), G1.01 (code type UNTDID1001 autorisé).
+  - CII F1 : ID (G1.05, format/longueur), date AAAAMMJJ (G1.09), type facture (G1.01).
 - Codelists/motifs : chargés depuis Annexe 7 (15 codes UNTDID1001, ~40 motifs de refus). Champs obligatoires extraits : F1 Base/Full (Annexe 1), e-reporting F10 (Annexe 6), annuaire F13/F14 (Annexe 3).
 
 ## Détail des endpoints
 - `POST /validate_message`
   - Entrée : `format` (ubl|cii|facturx|cdv|ereporting|annuaire), `profile` (base|full si pertinent), `flow` (f1|f6|f10|f13|f14 si pertinent), `payload` XML (string) ou base64 (si ça ne commence pas par `<`, tentative de base64.b64decode).
-  - Traitement : décodage, validation XSD (UBL/CII F1, e-reporting, annuaire, CDV avec schéma pivot Chorus Pro), règles UBL/F1 (ID G1.05, date G1.09, type G1.01 via UNTDID1001), issues de codelist séparées.
+  - Traitement : décodage, validation XSD (UBL/CII F1, e-reporting, annuaire, CDV avec schéma pivot Chorus Pro). Si `format=facturx`, extraction de l’XML embarqué dans le PDF et validation comme CII. Règles métier appliquées UBL/CII F1 (ID, date, type), issues de codelist séparées.
   - Réponse : `{ "syntax": [...], "rules": [ {ruleId, severity, xpath, message} ], "codelists": [...] }`.
 - `POST /audit_capabilities`
   - Entrée : `{formats, profiles, cdv_statuses, cadres, annuaire, facturx}`.
