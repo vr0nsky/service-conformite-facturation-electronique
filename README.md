@@ -15,7 +15,7 @@ Service FastAPI pour auditer la conformité Facturation Electronique (FR) : vali
 - `scripts/`: utilitaires.
   - `build_annex_cache.py`: convertit les XLSX en JSON.
   - `run_tests.sh`: lance les tests unittest.
-- `tests/`: tests unitaires (`test_validate_ubl.py`).
+- `tests/`: tests unitaires (`test_validate.py`).
 - `requirements.txt`: dépendances Python.
 - `docs/mcp-fe-design.md`: design du service.
 
@@ -24,21 +24,22 @@ Créer un virtualenv et installer les dépendances :
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r MCP/requirements.txt
+pip install -r requirements.txt
 ```
 
 ## Génération des caches annexes
-Nécessite les annexes XLSX (déjà présentes sous `specifications-externes-v3.1/2- Annexes_v3.1`).
+Nécessite les annexes XLSX (fournies séparément, ex. dossier `specifications-externes-v3.1/2- Annexes_v3.1` placé à côté du projet).
 ```bash
 source .venv/bin/activate
-python MCP/scripts/build_annex_cache.py --src "specifications-externes-v3.1/2- Annexes_v3.1" --out MCP/data/annexes_cache
+python scripts/build_annex_cache.py --src "../specifications-externes-v3.1/2- Annexes_v3.1" --out data/annexes_cache
+# ajuster --src selon l’emplacement réel des annexes
 ```
 Les codelists/motifs/champs obligatoires seront chargés automatiquement depuis ces JSON.
 
 ## Lancement du service
 ```bash
 source .venv/bin/activate
-uvicorn MCP.app.main:app --reload
+uvicorn app.main:app --reload
 ```
 Endpoints disponibles :
 - `POST /validate_message`: `{format: ubl|cii|facturx|cdv|ereporting|annuaire, profile: base|full, flow: f1|f6|f10|f13|f14, payload: xml|base64}` → rapport `{syntax[], rules[], codelists[]}`.
@@ -78,9 +79,9 @@ Endpoints disponibles :
 Tests unitaires (sans dépendance httpx) :
 ```bash
 source .venv/bin/activate
-MCP/scripts/run_tests.sh
+scripts/run_tests.sh
 # ou
-python -m unittest MCP.tests.test_validate_ubl
+python -m unittest MCP.tests.test_validate
 ```
 
 ## TODO / Améliorations
