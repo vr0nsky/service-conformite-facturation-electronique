@@ -21351,7 +21351,6 @@ Thus, the column Preference Criterion will indicate either A, B, C,...</ccts:Exa
                </xsd:documentation>
             </xsd:annotation>
          </xsd:element>
-		 <!--
 		 <xsd:element ref="cbc:TaxInclusiveAmount" minOccurs="0" maxOccurs="1">
             <xsd:annotation>
                <xsd:documentation>
@@ -21469,7 +21468,6 @@ Thus, the column Preference Criterion will indicate either A, B, C,...</ccts:Exa
                </xsd:documentation>
             </xsd:annotation>
          </xsd:element>
-		 -->
       </xsd:sequence>
    </xsd:complexType>
    <!--
