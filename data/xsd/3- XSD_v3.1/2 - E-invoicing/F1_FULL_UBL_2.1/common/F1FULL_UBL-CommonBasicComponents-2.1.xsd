@@ -154,8 +154,8 @@
    <xsd:element name="Characteristics" type="CharacteristicsType"/>
    -->
    <xsd:element name="ChargeIndicator" type="ChargeIndicatorType"/>
-   <xsd:element name="ChargeTotalAmount" type="ChargeTotalAmountType"/>
    <!--
+   <xsd:element name="ChargeTotalAmount" type="ChargeTotalAmountType"/>
    <xsd:element name="ChargeableQuantity" type="ChargeableQuantityType"/>
    <xsd:element name="ChargeableWeightMeasure" type="ChargeableWeightMeasureType"/>
    <xsd:element name="ChildConsignmentQuantity" type="ChildConsignmentQuantityType"/>
@@ -1627,12 +1627,12 @@
          <xsd:extension base="udt:IndicatorType"/>
       </xsd:simpleContent>
    </xsd:complexType>
+   <!--
    <xsd:complexType name="ChargeTotalAmountType">
       <xsd:simpleContent>
          <xsd:extension base="udt:AmountType"/>
       </xsd:simpleContent>
    </xsd:complexType>
-   <!--
    <xsd:complexType name="ChargeableQuantityType">
       <xsd:simpleContent>
          <xsd:extension base="udt:QuantityType"/>
