@@ -62,7 +62,9 @@
    <xsd:element name="AliasName" type="AliasNameType"/>
    <xsd:element name="AllowanceChargeReason" type="AllowanceChargeReasonType"/>
    <xsd:element name="AllowanceChargeReasonCode" type="AllowanceChargeReasonCodeType"/>
+   -->
    <xsd:element name="AllowanceTotalAmount" type="AllowanceTotalAmountType"/>
+   <!--
    <xsd:element name="AltitudeMeasure" type="AltitudeMeasureType"/>
    -->
    <xsd:element name="Amount" type="AmountType"/>
@@ -269,8 +271,8 @@
    <xsd:element name="DeliveryInstructions" type="DeliveryInstructionsType"/>
    <xsd:element name="DemurrageInstructions" type="DemurrageInstructionsType"/>
    <xsd:element name="Department" type="DepartmentType"/>
+   -->
    <xsd:element name="Description" type="DescriptionType"/>
-   -->  
    <xsd:element name="DescriptionCode" type="DescriptionCodeType"/>
    <!--   
    <xsd:element name="DespatchAdviceTypeCode" type="DespatchAdviceTypeCodeType"/>
@@ -474,7 +476,9 @@
    <xsd:element name="Line" type="LineType"/>
    <!--
    <xsd:element name="LineCountNumeric" type="LineCountNumericType"/>
+   -->
    <xsd:element name="LineExtensionAmount" type="LineExtensionAmountType"/>
+   <!--
    <xsd:element name="LineID" type="LineIDType"/>
    <xsd:element name="LineNumberNumeric" type="LineNumberNumericType"/>
    <xsd:element name="LineStatusCode" type="LineStatusCodeType"/>
@@ -623,8 +627,10 @@
    <xsd:element name="Password" type="PasswordType"/>
    <xsd:element name="PayPerView" type="PayPerViewType"/>
    <xsd:element name="PayableAlternativeAmount" type="PayableAlternativeAmountType"/>
+   -->
    <xsd:element name="PayableAmount" type="PayableAmountType"/>
    <xsd:element name="PayableRoundingAmount" type="PayableRoundingAmountType"/>
+   <!--
    <xsd:element name="PayerReference" type="PayerReferenceType"/>
    <xsd:element name="PaymentAlternativeCurrencyCode"
                 type="PaymentAlternativeCurrencyCodeType"/>
@@ -671,7 +677,9 @@
    <xsd:element name="PreEventNotificationDurationMeasure"
                 type="PreEventNotificationDurationMeasureType"/>
    <xsd:element name="PreferenceCriterionCode" type="PreferenceCriterionCodeType"/>
+   -->
    <xsd:element name="PrepaidAmount" type="PrepaidAmountType"/>
+   <!--
    <xsd:element name="PrepaidIndicator" type="PrepaidIndicatorType"/>
    <xsd:element name="PrepaidPaymentReferenceID" type="PrepaidPaymentReferenceIDType"/>
    <xsd:element name="PreviousCancellationReasonCode"
