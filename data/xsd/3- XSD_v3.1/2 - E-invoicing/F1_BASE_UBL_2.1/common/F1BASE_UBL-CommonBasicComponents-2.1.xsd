@@ -4890,11 +4890,13 @@
          <xsd:extension base="udt:IndicatorType"/>
       </xsd:simpleContent>
    </xsd:complexType>
+   -->
    <xsd:complexType name="TaxInclusiveAmountType">
       <xsd:simpleContent>
          <xsd:extension base="udt:AmountType"/>
       </xsd:simpleContent>
    </xsd:complexType>
+   <!--
    <xsd:complexType name="TaxLevelCodeType">
       <xsd:simpleContent>
          <xsd:extension base="udt:CodeType"/>
