@@ -5,7 +5,45 @@ import json
 
 router = APIRouter()
 
-RULES: Dict[str, Dict] = {}
+# Minimal fallback rules so /rules/* works even if annex cache is missing in deployment
+DEFAULT_RULES: Dict[str, Dict] = {
+    "G1.01": {
+        "title": "Types de facture autorisés",
+        "description": (
+            "Les types de factures autorisés (UNTDID 1001) incluent notamment : "
+            "380/381/384/389/393/501 pour les factures, 386/500 pour acomptes, "
+            "471/472/473 pour rectificatives, 261/396/502/503 pour avoirs."
+        ),
+        "flows": ["f1", "f6", "f10"],
+        "severity": "error",
+    },
+    "G1.02": {
+        "title": "Cadre de facturation",
+        "description": "Le cadre de facturation doit appartenir à la codelist CADRES (B1, S1, M1, ...).",
+        "flows": ["f1"],
+        "severity": "error",
+    },
+    "G1.05": {
+        "title": "Identifiant de facture",
+        "description": "ID obligatoire, 1 à 35 caractères autorisés (A–Z, a–z, 0–9, espace, - + _ /).",
+        "flows": ["f1"],
+        "severity": "error",
+    },
+    "G1.09": {
+        "title": "Date d'émission",
+        "description": "Date obligatoire ; format AAAA-MM-JJ (UBL) ou AAAAMMJJ (CII/e-reporting).",
+        "flows": ["f1", "f10"],
+        "severity": "error",
+    },
+    "G1.10": {
+        "title": "Devise",
+        "description": "La devise doit appartenir à la codelist ISO4217.",
+        "flows": ["f1"],
+        "severity": "error",
+    },
+}
+
+RULES: Dict[str, Dict] = DEFAULT_RULES.copy()
 
 CODELISTS: Dict[str, List[Dict]] = {}
 
@@ -222,10 +260,17 @@ def get_codelist(name: str):
 
 @router.get("/required_fields")
 def get_required_fields(profile: str, flow: str):
-    key = (profile, flow)
+    """
+    Retourne la liste des BT/TT/DT obligatoires pour un couple profil/flux.
+    Normalise en minuscules et nettoie les éventuels espaces ou retours ligne
+    présents dans les caches XLSX→JSON.
+    """
+    key = (profile.lower(), flow.lower())
     if key not in REQUIRED_FIELDS:
         raise HTTPException(status_code=404, detail="No required fields for profile/flow")
-    return REQUIRED_FIELDS[key]
+    fields = REQUIRED_FIELDS[key]
+    # Nettoyage léger : trim et suppression des entrées vides
+    return [f.strip() for f in fields if isinstance(f, str) and f.strip()]
 
 
 @router.get("/refusal_codes")

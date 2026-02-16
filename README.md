@@ -148,6 +148,18 @@ Endpoints disponibles :
   - Annuaire (minimal) : longueurs SIREN/SIRET (9 / 14).
 - Codelists/motifs : chargés depuis Annexe 7 (15 codes UNTDID1001, ~40 motifs de refus). Champs obligatoires extraits : F1 Base/Full (Annexe 1), e-reporting F10 (Annexe 6), annuaire F13/F14 (Annexe 3).
 
+## Guide pratique : relier les API à une facture (F1)
+1) Choisir le format et le profil : `format=ubl|cii|facturx`, `flow=f1`, `profile=base|full`.
+2) Lister les champs obligatoires : `GET /required_fields?profile=base&flow=f1` (ou `full`). Utiliser cette liste de BT pour préparer l'XML.
+3) Valider la facture : `POST /validate_message` avec `format`, `flow`, `profile` et `payload` (XML ou base64). Si `format=facturx`, le service extrait l'XML du PDF et valide en CII.
+4) Lire le rapport :
+   - `syntax[]` : erreurs XSD (structure, cardinalités, types).
+   - `rules[]` : règles G1.xx (ID manquant, date au mauvais format, etc.).
+   - `codelists[]` : valeurs hors codelist (type UNTDID1001, devise ISO4217, cadre CADRES).
+5) Corriger l'XML et rejouer la validation jusqu'à ce que les trois tableaux soient vides.
+
+Autres flux : F10 (e-reporting), F13/F14 (annuaire), F6 (cycle de vie CDV) utilisent les mêmes endpoints mais avec `flow=f10|f13|f14|f6` et leur format dédié (`ereporting`, `annuaire`, `cdv`).
+
 ## Détail des endpoints
 - `POST /validate_message`
   - Entrée : `format` (ubl|cii|facturx|cdv|ereporting|annuaire), `profile` (base|full si pertinent), `flow` (f1|f6|f10|f13|f14 si pertinent), `payload` XML (string) ou base64 (si ça ne commence pas par `<`, tentative de base64.b64decode).
